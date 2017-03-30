@@ -72,9 +72,10 @@ function renderHtml(options) {
     }
   </style>
   <link href="${options.css}" rel="stylesheet" />
-  <script src="//cdn.jsdelivr.net/fetch/0.9.0/fetch.min.js"></script>
-  <script src="//cdn.jsdelivr.net/react/15.3.2/react.js"></script>
-  <script src="//cdn.jsdelivr.net/react/15.3.2/react-dom.js"></script>
+  <link href="${options.theme}.css" rel="stylesheet" />
+  <script src="fetch.min.js"></script>
+  <script src="react.js"></script>
+  <script src="react-dom.js"></script>
   <script src="${options.js}"></script>
 </head>
 <body>
@@ -159,7 +160,8 @@ function renderHtml(options) {
         onEditVariables: onEditVariables,
         query: ${JSON.stringify(queryString)},
         response: ${JSON.stringify(resultString)},
-        variables: ${JSON.stringify(variablesString)}
+        variables: ${JSON.stringify(variablesString)},
+        theme: ${options.theme}
       }),
       document.getElementById('content')
     )
