@@ -85,7 +85,6 @@ function renderHtml(options) {
   </style>
   <link href="/${options.css}" rel="stylesheet" />
   <link href="/${options.theme}.css" rel="stylesheet" />
-  <script src="/fetch.js"></script>
   <script src="/react.min.js"></script>
   <script src="/react-dom.min.js"></script>
   <script src="/${options.js}"></script>
