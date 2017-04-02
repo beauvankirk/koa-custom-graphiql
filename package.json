@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/stems/koa-graphiql#readme",
   "peerDependencies": {
-    "koa": "^1.2.4 || ^2.0.0"
+    "koa": "^2.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",
