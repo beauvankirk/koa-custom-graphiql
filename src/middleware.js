@@ -1,60 +1,72 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createMiddleware;
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 // Current latest version of GraphiQL
-const GRAPHIQL_VERSION = '0.7.3'
+const GRAPHIQL_VERSION = '0.7.3';
 
-export default function createMiddleware(getOptions) {
-  return async function middleware() {
-    const options = getDefaultOptions(this)
-    let overrides = {}
-    if (typeof getOptions === 'function') {
-      overrides = getOptions(this)
-    } else if (typeof getOptions === 'object') {
-      overrides = getOptions
+function createMiddleware(getOptions) {
+  return (() => {
+    var _ref = _asyncToGenerator(function* () {
+      const options = getDefaultOptions(this);
+      let overrides = {};
+      if (typeof getOptions === 'function') {
+        overrides = getOptions(this);
+      } else if (typeof getOptions === 'object') {
+        overrides = getOptions;
+      }
+      Object.assign(options, typeof overrides.then === 'function' ? yield overrides : overrides);
+
+      this.body = renderHtml(options);
+      this.type = 'text/html';
+    });
+
+    function middleware() {
+      return _ref.apply(this, arguments);
     }
-    Object.assign(options, typeof overrides.then === 'function' ? (await overrides) : overrides)
 
-    this.body = renderHtml(options)
-    this.type = 'text/html'
-  }
+    return middleware;
+  })();
 }
 
 function getDefaultOptions(ctx) {
-  const body = ctx.request.body || {}
-  const query = body.query || ctx.query.query
+  const body = ctx.request.body || {};
+  const query = body.query || ctx.query.query;
 
-  let variables
-  let variablesString = body.variables || ctx.query.variables
+  let variables;
+  let variablesString = body.variables || ctx.query.variables;
   try {
-    variables = JSON.parse(variablesString)
+    variables = JSON.parse(variablesString);
   } catch (e) {}
 
-  let result
-  let resultString = body.result || ctx.query.result
+  let result;
+  let resultString = body.result || ctx.query.result;
   try {
-    result = JSON.parse(resultString)
+    result = JSON.parse(resultString);
   } catch (e) {}
 
-  const css = `//cdn.jsdelivr.net/graphiql/${GRAPHIQL_VERSION}/graphiql.css`
-  const js = `//cdn.jsdelivr.net/graphiql/${GRAPHIQL_VERSION}/graphiql.min.js`
-  const url = '/graphql'
+  const css = `//cdn.jsdelivr.net/graphiql/${GRAPHIQL_VERSION}/graphiql.css`;
+  const js = `//cdn.jsdelivr.net/graphiql/${GRAPHIQL_VERSION}/graphiql.min.js`;
+  const url = '/graphql';
 
-  return { query, variables, result, css, js, url }
+  return { query, variables, result, css, js, url };
 }
 
 /**
  * See express-graphql for the original implementation
  */
 function renderHtml(options) {
-  const queryString = options.query
-  const variablesString = options.variables ?
-    JSON.stringify(options.variables, null, 2) :
-    null
-  const resultString = options.result ?
-    JSON.stringify(options.result, null, 2) :
-    null
+  const queryString = options.query;
+  const variablesString = options.variables ? JSON.stringify(options.variables, null, 2) : null;
+  const resultString = options.result ? JSON.stringify(options.result, null, 2) : null;
 
   // How to Meet Ladies
-  return (
-`<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
@@ -71,12 +83,12 @@ function renderHtml(options) {
       height: 100%
     }
   </style>
-  <link href="${options.css}" rel="stylesheet" />
-  <link href="${options.theme}.css" rel="stylesheet" />
-  <script src="fetch.min.js"></script>
-  <script src="react.js"></script>
-  <script src="react-dom.js"></script>
-  <script src="${options.js}"></script>
+  <link href="/${options.css}" rel="stylesheet" />
+  <link href="/${options.theme}.css" rel="stylesheet" />
+  <script src="/fetch.js"></script>
+  <script src="/react.min.js"></script>
+  <script src="/react-dom.min.js"></script>
+  <script src="/${options.js}"></script>
 </head>
 <body>
   <div id="content"></div>
@@ -161,12 +173,11 @@ function renderHtml(options) {
         query: ${JSON.stringify(queryString)},
         response: ${JSON.stringify(resultString)},
         variables: ${JSON.stringify(variablesString)},
-        theme: ${options.theme}
+        editorTheme: '${options.theme}'
       }),
       document.getElementById('content')
     )
   </script>
 </body>
-</html>`
-  )
+</html>`;
 }
