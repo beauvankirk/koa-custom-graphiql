@@ -5,33 +5,27 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = createMiddleware;
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 // Current latest version of GraphiQL
 const GRAPHIQL_VERSION = '0.7.3';
 
 function createMiddleware(getOptions) {
-  return (() => {
-    var _ref = _asyncToGenerator(function* () {
-      const options = getDefaultOptions(this);
-      let overrides = {};
-      if (typeof getOptions === 'function') {
-        overrides = getOptions(this);
-      } else if (typeof getOptions === 'object') {
-        overrides = getOptions;
-      }
-      Object.assign(options, typeof overrides.then === 'function' ? yield overrides : overrides);
+  return (ctx) => {
+    const q = ctx.request.query || {};
+    const query = q.query || '';
+    const operationName = q.operationName || '';
 
-      this.body = renderHtml(options);
-      this.type = 'text/html';
-    });
+    const options = getDefaultOptions(ctx);
+    let overrides = {};
+      overrides = getOptions;
 
-    function middleware() {
-      return _ref.apply(this, arguments);
-    }
+    Object.assign(options, overrides);
 
-    return middleware;
-  })();
+    ctx.set('Content-Type', 'text/html');
+    ctx.body = renderHtml(options);
+
+  };
+
 }
 
 function getDefaultOptions(ctx) {
