@@ -1,26 +1,24 @@
 'use strict'
+const co = require('co');
+
 // Current latest version of GraphiQL
 const GRAPHIQL_VERSION = '0.7.3'
 
-export default function createMiddleware(getOptions) {
-  return async function middleware() {
-    const options = getDefaultOptions(this)
-    let overrides = {}
-    if (typeof getOptions === 'function') {
-      overrides = getOptions(this)
-    } else if (typeof getOptions === 'object') {
-      overrides = getOptions
+export default function createMiddleware(getOptionsAsync) {
+  return co.wrap(function* middleware(ctx) {
+    let options = getDefaultOptions(ctx)
+    if (getOptionsAsync) {
+      Object.assign(options, yield getOptionsAsync(ctx));
     }
-    Object.assign(options, typeof overrides.then === 'function' ? (await overrides) : overrides)
 
-    this.body = renderHtml(options)
-    this.type = 'text/html'
-  }
+    ctx.body = renderHtml(options)
+    ctx.type = 'text/html'
+  })
 }
 
 function getDefaultOptions(ctx) {
-  const body = ctx.request.body || {}
-  const query = body.query || ctx.query.query
+  let body = ctx.request.body || {}
+  let query = body.query || ctx.query.query
 
   let variables
   let variablesString = body.variables || ctx.query.variables
@@ -45,6 +43,7 @@ function getDefaultOptions(ctx) {
  * See express-graphql for the original implementation
  */
 function renderHtml(options) {
+  let url = options.url || ''
   const queryString = options.query
   const variablesString = options.variables ?
    JSON.stringify(options.variables, null, 2) :

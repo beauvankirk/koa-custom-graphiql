@@ -31,12 +31,15 @@
   },
   "homepage": "https://github.com/stems/koa-graphiql#readme",
   "peerDependencies": {
-    "koa": "^2.2.0"
+    "koa": "latest"
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",
     "babel-core": "^6.2.1",
-    "babel-preset-node6": "^11.0.0",
-    "babel-preset-stage-0": "^6.16.0"
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.0",
+    "babel-preset-stage-3": "^6.22.0"
+  },
+  "dependencies": {
+    "co": "^4.6.0"
   }
 }
