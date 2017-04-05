@@ -1,63 +1,57 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = createMiddleware;
-
-
+'use strict'
 // Current latest version of GraphiQL
-const GRAPHIQL_VERSION = '0.7.3';
+const GRAPHIQL_VERSION = '0.7.3'
 
-function createMiddleware(getOptions) {
-  return (ctx) => {
-    const q = ctx.request.query || {};
-    const query = q.query || '';
-    const operationName = q.operationName || '';
+export default function createMiddleware(getOptions) {
+  return async function middleware() {
+    const options = getDefaultOptions(this)
+    let overrides = {}
+    if (typeof getOptions === 'function') {
+      overrides = getOptions(this)
+    } else if (typeof getOptions === 'object') {
+      overrides = getOptions
+    }
+    Object.assign(options, typeof overrides.then === 'function' ? (await overrides) : overrides)
 
-    const options = getDefaultOptions(ctx);
-    let overrides = {};
-      overrides = getOptions;
-
-    Object.assign(options, overrides);
-
-    ctx.set('Content-Type', 'text/html');
-    ctx.body = renderHtml(options);
-
-  };
-
+    this.body = renderHtml(options)
+    this.type = 'text/html'
+  }
 }
 
 function getDefaultOptions(ctx) {
-  const body = ctx.request.body || {};
-  const query = body.query || ctx.query.query;
+  const body = ctx.request.body || {}
+  const query = body.query || ctx.query.query
 
-  let variables;
-  let variablesString = body.variables || ctx.query.variables;
+  let variables
+  let variablesString = body.variables || ctx.query.variables
   try {
-    variables = JSON.parse(variablesString);
+    variables = JSON.parse(variablesString)
   } catch (e) {}
 
-  let result;
-  let resultString = body.result || ctx.query.result;
+  let result
+  let resultString = body.result || ctx.query.result
   try {
-    result = JSON.parse(resultString);
+    result = JSON.parse(resultString)
   } catch (e) {}
 
-  const css = `//cdn.jsdelivr.net/graphiql/${GRAPHIQL_VERSION}/graphiql.css`;
-  const js = `//cdn.jsdelivr.net/graphiql/${GRAPHIQL_VERSION}/graphiql.min.js`;
-  const url = '/graphql';
+  const css = `//cdn.jsdelivr.net/graphiql/${GRAPHIQL_VERSION}/graphiql.css`
+  const js = `//cdn.jsdelivr.net/graphiql/${GRAPHIQL_VERSION}/graphiql.min.js`
+  const url = '/graphql'
 
-  return { query, variables, result, css, js, url };
+  return { query, variables, result, css, js, url }
 }
 
 /**
  * See express-graphql for the original implementation
  */
 function renderHtml(options) {
-  const queryString = options.query;
-  const variablesString = options.variables ? JSON.stringify(options.variables, null, 2) : null;
-  const resultString = options.result ? JSON.stringify(options.result, null, 2) : null;
+  const queryString = options.query
+  const variablesString = options.variables ?
+   JSON.stringify(options.variables, null, 2) :
+    null
+  const resultString = options.result ?
+   JSON.stringify(options.result, null, 2) :
+    null
 
   // How to Meet Ladies
   return `<!DOCTYPE html>
@@ -172,5 +166,5 @@ function renderHtml(options) {
     )
   </script>
 </body>
-</html>`;
+</html>`
 }
